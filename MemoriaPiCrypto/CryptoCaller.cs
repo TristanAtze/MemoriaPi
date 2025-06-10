@@ -3,7 +3,7 @@ using System.Security; // Für SecureString
 using System.Text;
 using MemoriaPiCrypo.Cypher;
 
-namespace MemoriaPiCrypo;
+namespace MemoriaPiCrypto;
 
 // Wichtiger Hinweis: SecureString und das sichere Löschen von Speicher sind komplexe Themen.
 // SecureString hat Einschränkungen, und 100% garantierte sichere Speicherlöschung kann schwierig sein.
@@ -46,7 +46,7 @@ public static class Crypto
     {
         if (!File.Exists(KeyTxt))
         {
-            File.WriteAllText(ConvertTxtToBinary("Highly Secure Key"), KeyTxt);
+            File.WriteAllText("Key.txt", ConvertTxtToBinary("Highly Secure Key"));
         }
     }
     

@@ -19,7 +19,7 @@ public static class HighlySecureAuthenticatedVersionedCipher
     private const int Pbkdf2SaltSizeBytes = 16;
 
     // SEHR hohe Iterationen für PBKDF2.
-    private const int Pbkdf2Iterations = 600000; // Oder mehr, je nach Performance-Budget
+    private const int Pbkdf2Iterations = 50000; // Oder mehr, je nach Performance-Budget
 
     /// <summary>
     /// Löscht den Inhalt eines Byte-Arrays sicher, indem er mit Nullen überschrieben wird.

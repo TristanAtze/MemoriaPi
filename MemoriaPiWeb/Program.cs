@@ -1,3 +1,14 @@
+using MemoriaPiDataCore.SQL;
+using MemoriaPiDataCore.LocalStorage;
+
+
+
+DatabaseSetup databaseSetup = new DatabaseSetup();
+databaseSetup.InitializeDatabase();
+SqlReader sqlReader = new SqlReader();
+
+LocalSetup.SetupDataStructure();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
