@@ -6,13 +6,13 @@ public class LocalSetup
 {
     public static void SetupDataStructure()
     {
-        List<User> currentUsers = SqlReader.GetCachedUsers();
+        List<ApplicationUser> currentUsers = SqlReader.GetCachedUsers();
         
         if (!Directory.Exists("Users"))
             Directory.CreateDirectory("Users");
 
         
-        foreach (User currentUser in currentUsers)
+        foreach (ApplicationUser currentUser in currentUsers)
         {
             if (!Directory.Exists("Users\\" + Convert.ToString(currentUser.Id)))
                 Directory.CreateDirectory("Users\\" + Convert.ToString(currentUser.Id));

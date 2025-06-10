@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace MemoriaPiDataCore.Models
 {
-    public class User
+    public class ApplicationUser : IdentityUser
     {
         public int Id { get; set; }
         public int UserRoleId { get; set; }
@@ -13,7 +15,7 @@ namespace MemoriaPiDataCore.Models
         // Navigation property to hold the related UserRole object
         public UserRole? Role { get; set; }
 
-        public User(int id, int userRoleId, string name, string email, string userName, string password, bool hasAccess)
+        public ApplicationUser(int id = 0, int userRoleId = 1, string name = "", string email = "", string userName = "", string password = "", bool hasAccess = false)
         {
             Id = id;
             UserRoleId = userRoleId;

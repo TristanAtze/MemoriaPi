@@ -13,7 +13,7 @@ namespace MemoriaPiDataCore.SQL
             _connectionString = connectionString;
         }
 
-        public void CreateUser(User user)
+        public void CreateUser(ApplicationUser user)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -35,7 +35,7 @@ namespace MemoriaPiDataCore.SQL
             }
         }
 
-        public void UpdateUser(User user)
+        public void UpdateUser(ApplicationUser user)
         {
             using (var connection = new SqlConnection(_connectionString))
             {

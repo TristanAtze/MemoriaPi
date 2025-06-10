@@ -8,7 +8,7 @@ namespace MemoriaPiDataCore.SQL
     {
         private readonly string _connectionString;
         
-        private static List<User> _cachedUsers = new List<User>();
+        private static List<ApplicationUser> _cachedUsers = new List<ApplicationUser>();
         private static List<UserRole> _cachedRoles = new List<UserRole>();
 
         public SqlReader(string connectionString = "Data Source = 192.168.6.131; Initial Catalog = _BS_TestDB; User ID = Azubi; Password = TestSQL2020#!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=True;")
@@ -17,7 +17,7 @@ namespace MemoriaPiDataCore.SQL
             ReloadAllData();
         }
         
-        public static List<User> GetCachedUsers() => _cachedUsers;
+        public static List<ApplicationUser> GetCachedUsers() => _cachedUsers;
         public static List<UserRole> GetCachedRoles() => _cachedRoles;
         
         public void ReloadAllData()
@@ -50,9 +50,9 @@ namespace MemoriaPiDataCore.SQL
             return roles;
         }
 
-        private List<User> LoadUsersFromDb()
+        private List<ApplicationUser> LoadUsersFromDb()
         {
-            var users = new List<User>();
+            var users = new List<ApplicationUser>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
@@ -68,7 +68,7 @@ namespace MemoriaPiDataCore.SQL
                     while (reader.Read())
                     {
                         users.Add(
-                            new User(reader.GetInt32(0), 
+                            new ApplicationUser(reader.GetInt32(0), 
                                 reader.GetInt32(1), 
                                 reader.GetString(2), 
                                 reader.GetString(3),
