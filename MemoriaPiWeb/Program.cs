@@ -1,36 +1,41 @@
-using MemoriaPiDataCore.SQL;
+using MemoriaPiDataCore.Data;
 using MemoriaPiDataCore.LocalStorage;
-using MemoriaPiDataCore.Models; // Hier befindet sich Ihre "User"-Klasse
+using MemoriaPiDataCore.Models;
+using MemoriaPiDataCore.SQL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-// using MemoriaPiDataCore.Data; // Überprüfen, ob beide DbContexts nötig sind
-using MemoriaPiWeb.Data;
-using ApplicationDbContext = MemoriaPiDataCore.Data.ApplicationDbContext;
-
-// Initialisierung deiner eigenen Dienste
-DatabaseSetup databaseSetup = new DatabaseSetup();
-databaseSetup.InitializeDatabase();
-LocalSetup.SetupDataStructure();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Services zum Container hinzufügen ---
-
+// --- ZUERST: Konfiguration lesen ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// DbContext für Identity
+// --- ZWEITENS: Eigene Dienste mit der Konfiguration initialisieren ---
+if (!string.IsNullOrEmpty(connectionString))
+{
+    DatabaseSetup databaseSetup = new DatabaseSetup(connectionString);
+    databaseSetup.InitializeDatabase();
+    LocalSetup.SetupDataStructure();
+}
+else
+{
+    throw new InvalidOperationException("DefaultConnection string not found in configuration.");
+}
+
+
+// --- DRITTENS: Services zum Container hinzufügen ---
+
+// DbContext für Identity registrieren (nutzt denselben Connection String)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Identity hinzufügen und konfigurieren
-// HIER "User" anstelle von "ApplicationUser" verwenden
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false) 
+// Identity hinzufügen und für ApplicationUser konfigurieren
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddRazorPages();
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -44,15 +49,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

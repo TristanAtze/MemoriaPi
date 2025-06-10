@@ -1,17 +1,20 @@
 #nullable disable
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MemoriaPiDataCore.Models; // Wichtig: Namespace zu Ihrem ApplicationUser
+using Microsoft.Extensions.Logging;
+using MemoriaPiDataCore.Models; // Sicherstellen, dass der Namespace zu Ihrer ApplicationUser-Klasse korrekt ist
 
 namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        // HIER WIRD ApplicationUser verwendet
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
@@ -24,6 +27,9 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        ///     Diese Eigenschaft wurde wieder hinzugefügt.
+        /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public string ReturnUrl { get; set; }
@@ -57,6 +63,7 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
+            // Diese Logik wurde wieder hinzugefügt.
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
@@ -66,12 +73,11 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
 
+            // Diese Logik wurde wieder hinzugefügt.
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {

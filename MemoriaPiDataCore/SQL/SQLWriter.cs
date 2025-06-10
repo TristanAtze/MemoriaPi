@@ -8,7 +8,7 @@ namespace MemoriaPiDataCore.SQL
     {
         private readonly string _connectionString;
 
-        public SqlWriter(string connectionString = "Data Source = 192.168.6.131; Initial Catalog = _BS_TestDB; User ID = Azubi; Password = TestSQL2020#!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=True;")
+        public SqlWriter(string connectionString = "Server=(localdb)\\LocalTestDB;Database=TestDB;Integrated Security=True;")
         {
             _connectionString = connectionString;
         }
@@ -25,10 +25,10 @@ namespace MemoriaPiDataCore.SQL
                 ";
 
                 command.Parameters.AddWithValue("@userRoleId", user.UserRoleId);
-                command.Parameters.AddWithValue("@name", Crypto.Encryption(user.Name));
-                command.Parameters.AddWithValue("@email", Crypto.Encryption(user.Email));
-                command.Parameters.AddWithValue("@userName", Crypto.Encryption(user.UserName));
-                command.Parameters.AddWithValue("@password", Crypto.Encryption(user.UserName)); 
+                command.Parameters.AddWithValue("@name", user.Name);
+                command.Parameters.AddWithValue("@email", user.Email);
+                command.Parameters.AddWithValue("@userName", user.UserName);
+                command.Parameters.AddWithValue("@password", user.UserName); 
                 command.Parameters.AddWithValue("@hasAccess", user.HasAccess);
 
                 command.ExecuteNonQuery();
