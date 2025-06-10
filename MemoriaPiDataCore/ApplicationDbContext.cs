@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MemoriaPiDataCore.Models;
 
+// Der Namespace ist jetzt der korrekte "Pfad" zur Datei.
 namespace MemoriaPiDataCore.Data
 {
-    // Sicherstellen, dass der DbContext von IdentityDbContext<User> erbt
+    // Dies ist die Klasse innerhalb des Data-Namespaces.
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)

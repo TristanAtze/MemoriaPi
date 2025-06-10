@@ -20,30 +20,33 @@ namespace MemoriaPiDataCore.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            // Leitet zur Razor Page für die Registrierung weiter
+            return RedirectToPage("/Account/Register", new { area = "Identity" });
         }
 
-        // POST: /Account/Register
+        // POST: /Account/Register - Dieser Endpunkt wird von der Razor Page übernommen,
+        // aber wir lassen ihn hier, falls Sie ihn später benötigen.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
+                // *** KORREKTUR HIER: Die 'Password'-Zuweisung wurde entfernt ***
                 var user = new ApplicationUser
                 {
-                    Email = model.Email,
                     UserName = model.Email,
-                    Password = model.Password,
+                    Email = model.Email,
                     HasAccess = false // Standardmäßig auf false gesetzt
                 };
 
+                // Der UserManager kümmert sich um das Passwort
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
-                    // Nach der Registrierung zum Login weiterleiten
-                    return RedirectToAction("Login", "Account");
+                    // Leitet zur Razor Page für den Login weiter
+                    return RedirectToPage("/Account/Login", new { area = "Identity" });
                 }
 
                 foreach (var error in result.Errors)
@@ -51,53 +54,26 @@ namespace MemoriaPiDataCore.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-            return View(model);
+            // Wenn etwas fehlschlägt, bleiben wir auf der Registrierungs-Seite
+            return RedirectToPage("/Account/Register", new { area = "Identity" });
         }
 
         // GET: /Account/Login
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            // Leitet zur Razor Page für den Login weiter
+            return RedirectToPage("/Account/Login", new { area = "Identity" });
         }
 
-        // POST: /Account/Login
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user != null && !user.HasAccess)
-                {
-                     // Einloggen, aber dann auf "Zugriff verweigert" prüfen
-                     var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-                     if (result.Succeeded)
-                     {
-                         return RedirectToAction("AccessDenied");
-                     }
-                }
-                else if (user != null && user.HasAccess)
-                {
-                    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-                    if (result.Succeeded)
-                    {
-                        return RedirectToAction("Index", "Home"); // Oder zu einem Dashboard
-                    }
-                }
+        // POST: /Account/Login - Dieser Endpunkt wird von der Razor Page übernommen.
 
-                ModelState.AddModelError(string.Empty, "Ungültiger Login-Versuch.");
-            }
-
-            return View(model);
-        }
-        
         // GET: /Account/AccessDenied
         [HttpGet]
         public IActionResult AccessDenied()
         {
-            return View();
+            // Leitet zur Razor Page für "Zugriff verweigert" weiter
+            return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
         }
 
         // POST: /Account/Logout
