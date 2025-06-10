@@ -10,14 +10,13 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using MemoriaPiDataCore.Models; // Sicherstellen, dass der Namespace korrekt ist
+using MemoriaPiDataCore.Models;
 
 namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class ForgotPasswordModel : PageModel
     {
-        // Dies wird jetzt korrekt für ApplicationUser angefordert
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
 
@@ -30,6 +29,9 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; }
 
+        public bool FormSubmittedSuccessfully { get; set; } = false;
+        public string DebugLink { get; set; }
+
         public class InputModel
         {
             [Required]
@@ -37,16 +39,26 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             public string Email { get; set; }
         }
 
+        public void OnGet()
+        {
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+
+                // *** KORREKTUR HIER: Wir prüfen nur noch, ob der Benutzer existiert. ***
+                // Der Email-Bestätigungs-Check wird für die Entwicklung entfernt.
+                if (user == null)
                 {
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                    // Zeige die Erfolgsmeldung trotzdem an, um nicht preiszugeben, ob ein Benutzer existiert.
+                    FormSubmittedSuccessfully = true;
+                    return Page();
                 }
 
+                // Dieser Code wird jetzt für jeden existierenden Benutzer erreicht.
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
@@ -58,9 +70,8 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
                 await _emailSender.SendEmailAsync(Input.Email, "Reset Password",
                     $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                TempData["DebugLink"] = callbackUrl;
-
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                FormSubmittedSuccessfully = true;
+                DebugLink = callbackUrl;
             }
 
             return Page();
