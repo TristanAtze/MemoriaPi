@@ -5,6 +5,44 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Memoria Pi</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Willkommen!</h1>
+    <p>Wählen Sie eine der folgenden Optionen.</p>
+</div>
+
+<div class="row justify-content-center mt-5">
+
+    <div class="col-lg-4 col-md-6 mb-4">
+        <a href="#" class="dashboard-tile h-100">
+            <i class="fas fa-brain fa-3x"></i>
+            <h4>KI Chat</h4>
+            <p>Starten Sie eine Konversation.</p>
+        </a>
+    </div>
+
+    <div class="col-lg-4 col-md-6 mb-4">
+        <a href="#" class="dashboard-tile h-100">
+            <i class="fas fa-cloud-upload-alt fa-3x"></i>
+            <h4>Cloud Storage</h4>
+            <p>Verwalten Sie Ihre Dateien.</p>
+        </a>
+    </div>
+
+    <div class="col-lg-4 col-md-6 mb-4">
+        <a href="#" class="dashboard-tile h-100">
+            <i class="fas fa-clipboard-list fa-3x"></i>
+            <h4>Tickets</h4>
+            <p>Support-Anfragen erstellen.</p>
+        </a>
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-lg-4 col-md-6 mb-4">
+            <a href="/Users" class="dashboard-tile h-100">
+                <i class="fas fa-user-shield fa-3x"></i>
+                <h4>Admin Portal</h4>
+                <p>Benutzer und System verwalten.</p>
+            </a>
+        </div>
+    }
 </div>

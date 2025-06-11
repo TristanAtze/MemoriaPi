@@ -133,3 +133,167 @@ body {
         .dashboard-tile.admin-tile:hover {
             color: #dc3545;
         }
+
+@keyframes gradient-animation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+body {
+    background: linear-gradient(-45deg, #0b0213, #200a40, #36116e, #1a0633);
+    background-size: 400% 400%;
+    animation: gradient-animation 15s ease infinite;
+    color: white;
+}
+
+.dashboard-tile {
+    background: rgba(255, 255, 255, 0.1); /* Leicht weißlicher, transparenter Hintergrund */
+    backdrop-filter: blur(10px); /* Der eigentliche Milchglas-Effekt (macht den Hintergrund unscharf) */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Eine feine, helle Kante */
+    border-radius: 15px; /* Rundere Ecken für einen weicheren Look */
+    color: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease; /* Sanfter Übergang für alle Änderungen */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+    .dashboard-tile:hover {
+        background: rgba(255, 255, 255, 0.2); /* Beim Hover etwas heller/durchsichtiger */
+        backdrop-filter: blur(15px); /* Unschärfe wird stärker */
+        transform: translateY(-10px); /* Hebt die Kachel leicht an */
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Leichter Schatten für mehr Tiefe */
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .dashboard-tile i {
+        margin-bottom: 1rem; /* Abstand zwischen Icon und Text */
+    }
+
+/* Wir zielen direkt auf das <header>-Element, in dem die Navbar liegt */
+header .navbar {
+    background-color: transparent !important; /* HIER IST DIE ÄNDERUNG */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    /* Spezifischere Selektoren für die Link-Farben */
+    header .navbar .navbar-brand,
+    header .navbar .nav-item .nav-link {
+        color: #ffffff !important; /* Weißer Text, mit !important erzwungen */
+        transition: color 0.3s ease; /* Sanfter Übergang für den Hover-Effekt */
+    }
+
+        header .navbar .nav-item .nav-link:hover {
+            color: #d8c4f5 !important; /* Heller Lila-Ton beim Hovern */
+        }
+
+
+/* --- VERBESSERTE FOOTER-REGELN --- */
+/* Wir zielen direkt auf das <footer>-Element */
+footer.footer {
+    color: rgba(255, 255, 255, 0.8) !important; /* Weißer Text, mit !important erzwungen */
+    background-color: transparent; /* Stellt sicher, dass kein eigener Hintergrund die Body-Farbe überdeckt */
+    border-top: 1px solid rgba(255, 255, 255, 0.1); /* Eine dezente obere Trennlinie, passend zur Navbar */
+}
+
+/* ==========================================================================
+   Globaler Stil für Buttons und Formular-Elemente (Milchglas-Effekt)
+   ========================================================================== */
+
+/* --- Allgemeiner Stil für alle Buttons --- */
+.btn {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 25px !important; /* Stark abgerundete Ecken für den "Edge"-Look */
+    color: white !important;
+    padding: 10px 25px !important;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    /* Hover-Effekt für alle Buttons */
+    .btn:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+        transform: translateY(-3px); /* Leichter "Anhebe"-Effekt */
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+/* Spezieller Stil für den primären Button (z.B. Login) für mehr Gewichtung */
+.btn-primary {
+    background: rgba(120, 60, 220, 0.4) !important; /* Lila-Ton, passend zum Design */
+    border-color: rgba(120, 60, 220, 0.8) !important;
+}
+
+    .btn-primary:hover {
+        background: rgba(120, 60, 220, 0.6) !important;
+    }
+
+
+/* --- Allgemeiner Stil für Textboxen und andere Formularfelder --- */
+.form-control,
+.form-select { /* Gilt für <input>, <textarea> und <select> */
+    background: rgba(0, 0, 0, 0.2) !important; /* Dunklerer, transparenter Hintergrund für Kontrast */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 25px !important; /* Passende abgerundete Ecken */
+    color: white !important;
+    padding: 10px 20px !important;
+    transition: all 0.3s ease;
+}
+
+    /* Stil, wenn in ein Feld geklickt wird (Focus) */
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 0 0 3px rgba(120, 60, 220, 0.5) !important; /* Leuchtender Rand beim Auswählen */
+        border-color: rgba(120, 60, 220, 0.8) !important;
+        outline: none !important; /* Standard-Fokus-Rand entfernen */
+    }
+
+    /* Textfarbe für Platzhalter anpassen (z.B. "E-Mail-Adresse") */
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+/* ==========================================================================
+   Spezieller Container-Stil NUR für Formular-Seiten
+   ========================================================================== */
+
+.form-container-wrapper {
+    background: rgba(30, 10, 60, 0.5);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2.5rem; /* Etwas mehr Innenabstand */
+    margin-top: 2rem;
+    color: white;
+}
+
+    /* Anpassungen für Elemente innerhalb des neuen Containers */
+    .form-container-wrapper h1,
+    .form-container-wrapper h2,
+    .form-container-wrapper h4 {
+        color: white;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-container-wrapper hr {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
