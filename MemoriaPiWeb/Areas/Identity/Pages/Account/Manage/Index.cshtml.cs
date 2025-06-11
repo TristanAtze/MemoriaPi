@@ -76,7 +76,10 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) { return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'."); }
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
 
             if (!ModelState.IsValid)
             {
@@ -84,26 +87,40 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            // Benutzernamen und Telefonnummer aktualisieren (wie bisher)
-            // ...
+            var userName = await _userManager.GetUserNameAsync(user);
+            if (Input.Username != userName)
+            {
+                var setUserNameResult = await _userManager.SetUserNameAsync(user, Input.Username);
+                if (!setUserNameResult.Succeeded)
+                {
+                    StatusMessage = "Error: That username is already taken.";
+                    return RedirectToPage();
+                }
+            }
 
-            // NEU: Logik zum Verarbeiten des Bild-Uploads
+            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            if (Input.PhoneNumber != phoneNumber)
+            {
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                if (!setPhoneResult.Succeeded)
+                {
+                    StatusMessage = "Unexpected error when trying to set phone number.";
+                    return RedirectToPage();
+                }
+            }
+
             if (Input.ProfilePicture != null)
             {
-                // Eindeutigen Dateinamen erstellen, um Konflikte zu vermeiden
                 string fileName = user.Id + Path.GetExtension(Input.ProfilePicture.FileName);
-                // Pfad zum Ordner, in dem die Bilder gespeichert werden (wwwroot/images/profile)
                 string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profile");
                 string filePath = Path.Combine(uploadsFolder, fileName);
 
-                // Sicherstellen, dass der Ordner existiert
                 Directory.CreateDirectory(uploadsFolder);
 
-                // Altes Bild löschen, falls vorhanden
                 if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
                 {
                     var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, user.ProfilePictureUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(oldImagePath))
+                    if (System.IO.File.Exists(oldImagePath) && oldImagePath != filePath)
                     {
                         System.IO.File.Delete(oldImagePath);
                     }
@@ -117,7 +134,6 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
                 user.ProfilePictureUrl = $"/images/profile/{fileName}";
                 await _userManager.UpdateAsync(user);
             }
-
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

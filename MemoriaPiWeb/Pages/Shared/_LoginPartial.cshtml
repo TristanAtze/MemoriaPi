@@ -1,5 +1,5 @@
 @using Microsoft.AspNetCore.Identity
-@using MemoriaPiDataCore.Models;
+@using MemoriaPiDataCore.Models
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
@@ -7,22 +7,40 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        // NEU: Wir holen uns das gesamte Benutzer-Objekt, um auf das Profilbild zugreifen zu können
+        var user = await UserManager.GetUserAsync(User);
+
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
+            <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+
+                Hallo
+
+                @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    <img src="@user.ProfilePictureUrl" alt="Profile Picture" class="nav-profile-pic" />
+                }
+                else
+                {
+                    // Fallback auf ein Standardbild, falls keins vorhanden ist
+                    <img src="/images/profile/default.png" alt="Profile Picture" class="nav-profile-pic" />
+                }
+
+                @user?.UserName!
+            </a>
         </li>
         <li class="nav-item">
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })">
+                <button id="logout" type="submit" class="nav-link btn btn-link text-dark">Logout</button>
             </form>
         </li>
     }
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
     }
 </ul>

@@ -84,3 +84,15 @@ body {
         color: #757575;
         border-color: #aaa;
     }
+
+/* --- CSS für das Profilbild in der Navigationsleiste --- */
+
+.nav-profile-pic {
+    width: 30px; /* Größe des Kreises */
+    height: 30px;
+    border-radius: 50%; /* Macht das Bild rund */
+    object-fit: cover; /* Stellt sicher, dass das Bild den Kreis ausfüllt, ohne sich zu verzerren */
+    margin-left: 5px; /* Kleiner Abstand zum "Hallo" */
+    margin-right: 5px; /* Kleiner Abstand zum Benutzernamen */
+    border: 1px solid #ddd; /* Optional: ein feiner Rand um das Bild */
+}
