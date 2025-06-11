@@ -48,17 +48,12 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
-
-                // *** KORREKTUR HIER: Wir prüfen nur noch, ob der Benutzer existiert. ***
-                // Der Email-Bestätigungs-Check wird für die Entwicklung entfernt.
                 if (user == null)
                 {
-                    // Zeige die Erfolgsmeldung trotzdem an, um nicht preiszugeben, ob ein Benutzer existiert.
                     FormSubmittedSuccessfully = true;
                     return Page();
                 }
 
-                // Dieser Code wird jetzt für jeden existierenden Benutzer erreicht.
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
