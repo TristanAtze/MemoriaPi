@@ -29,3 +29,58 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* --- CSS für Social-Login-Buttons --- */
+
+/* Container, um die Buttons zu zentrieren und untereinander zu platzieren */
+.social-login-container {
+    display: flex;
+    flex-direction: column; /* Buttons untereinander anordnen */
+    align-items: center; /* Horizontal zentrieren */
+    gap: 10px; /* Abstand zwischen den Buttons */
+}
+
+/* Allgemeiner Stil für die Buttons */
+.btn-social {
+    font-size: 1.1rem; /* Größere Schrift */
+    padding: 10px 20px; /* Mehr Innenabstand für größere Buttons */
+    width: 320px; /* Feste Breite für einheitliches Aussehen */
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* Abstand zwischen Icon und Text */
+}
+
+/* Spezifische Farben für jeden Anbieter */
+.btn-microsoft {
+    background-color: #0078D4;
+    color: white;
+}
+
+    .btn-microsoft:hover {
+        background-color: #005a9e;
+        color: white;
+    }
+
+.btn-github {
+    background-color: #333;
+    color: white;
+}
+
+    .btn-github:hover {
+        background-color: #1a1a1a;
+        color: white;
+    }
+
+.btn-google {
+    background-color: #fff;
+    color: #757575; /* Google's Grau-Ton */
+    border: 1px solid #ccc;
+}
+
+    .btn-google:hover {
+        background-color: #f5f5f5;
+        color: #757575;
+        border-color: #aaa;
+    }

@@ -47,13 +47,34 @@
                 else
                 {
                     <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
+
+                        <div class="social-login-container">
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                // Wir passen den Button an, je nachdem, welcher Anbieter es ist
+                                string providerClass = "";
+                                string providerIcon = "";
+
+                                if (provider.Name.Contains("Microsoft"))
                                 {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                    providerClass = "btn-microsoft";
+                                    providerIcon = "fa-brands fa-microsoft";
                                 }
-                            </p>
+                                else if (provider.Name.Contains("GitHub"))
+                                {
+                                    providerClass = "btn-github";
+                                    providerIcon = "fa-brands fa-github";
+                                }
+                                else if (provider.Name.Contains("Google"))
+                                {
+                                    providerClass = "btn-google";
+                                    providerIcon = "fa-brands fa-google";
+                                }
+
+                                <button type="submit" class="btn btn-social @providerClass" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                                    <i class="@providerIcon fa-fw"></i> @provider.DisplayName
+                                </button>
+                            }
                         </div>
                     </form>
                 }

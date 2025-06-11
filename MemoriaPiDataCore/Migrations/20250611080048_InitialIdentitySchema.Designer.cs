@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MemoriaPiDataCore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250610202054_InitialIdentitySchema")]
+    [Migration("20250611080048_InitialIdentitySchema")]
     partial class InitialIdentitySchema
     {
         /// <inheritdoc />

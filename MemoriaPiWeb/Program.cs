@@ -37,7 +37,18 @@ builder.Services.AddAuthentication()
     {
         microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
         microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+    })
+    .AddGitHub(githubOptions =>
+    {
+        githubOptions.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
+        githubOptions.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
+
 
 builder.Services.AddRazorPages();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
