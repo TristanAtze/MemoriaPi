@@ -96,3 +96,40 @@ body {
     margin-right: 5px; /* Kleiner Abstand zum Benutzernamen */
     border: 1px solid #ddd; /* Optional: ein feiner Rand um das Bild */
 }
+
+/* --- Styling für Dashboard-Kacheln --- */
+.dashboard-tile {
+    display: block;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+    .dashboard-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        color: #007bff;
+    }
+
+    .dashboard-tile i {
+        margin-bottom: 1rem;
+        color: #007bff;
+    }
+
+    .dashboard-tile.admin-tile {
+        border-color: #dc3545;
+    }
+
+        .dashboard-tile.admin-tile i {
+            color: #dc3545;
+        }
+
+        .dashboard-tile.admin-tile:hover {
+            color: #dc3545;
+        }

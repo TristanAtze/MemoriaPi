@@ -8,9 +8,7 @@ namespace MemoriaPiDataCore.Data
     // Dies ist die Klasse innerhalb des Data-Namespaces.
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+        public DbSet<PasswordResetRequest> PasswordResetRequests { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     }
 }

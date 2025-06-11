@@ -2,10 +2,11 @@ using MemoriaPiDataCore.Data;
 using MemoriaPiDataCore.LocalStorage;
 using MemoriaPiDataCore.Models;
 using MemoriaPiDataCore.SQL;
+using MemoriaPiWeb.Middleware;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using MemoriaPiWeb.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using MemoriaPiWeb.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,29 +28,51 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultUI()
+    .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication()
-    .AddMicrosoftAccount(microsoftOptions =>
+var authenticationBuilder = builder.Services.AddAuthentication();
+
+// --- Microsoft-Login hinzufügen, WENN konfiguriert ---
+var microsoftClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+var microsoftClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
+{
+    authenticationBuilder.AddMicrosoftAccount(microsoftOptions =>
     {
-        microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
-        microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
-    })
-    .AddGitHub(githubOptions =>
-    {
-        githubOptions.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
-        githubOptions.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
-    })
-    .AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        microsoftOptions.ClientId = microsoftClientId;
+        microsoftOptions.ClientSecret = microsoftClientSecret;
     });
+}
+
+// --- Google-Login hinzufügen, WENN konfiguriert ---
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    authenticationBuilder.AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = googleClientId;
+        googleOptions.ClientSecret = googleClientSecret;
+    });
+}
+
+// --- GitHub-Login hinzufügen, WENN konfiguriert ---
+var githubClientId = builder.Configuration["Authentication:GitHub:ClientId"];
+var githubClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
+if (!string.IsNullOrEmpty(githubClientId) && !string.IsNullOrEmpty(githubClientSecret))
+{
+    authenticationBuilder.AddGitHub(githubOptions =>
+    {
+        githubOptions.ClientId = githubClientId;
+        githubOptions.ClientSecret = githubClientSecret;
+    });
+}
 
 
 builder.Services.AddRazorPages();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
@@ -66,8 +89,14 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseMiddleware<CheckPasswordResetMiddleware>();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+using (var scope = app.Services.CreateScope())
+{
+    await SeedData.Initialize(scope.ServiceProvider);
+}
 
 app.Run();
