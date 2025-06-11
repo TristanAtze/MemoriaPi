@@ -7,9 +7,9 @@ namespace MemoriaPiDataCore.SQL
     {
         private readonly string _connectionString;
 
-        //Data Source = 192.168.6.131; Initial Catalog = _BS_TestDB; User ID = Azubi; Password = TestSQL2020#!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=True;)
+        //Server=(localdb)\\LocalTestDB;Database=TestDB;Integrated Security=True;)
 
-        public DatabaseSetup(string connectionString = "Server=(localdb)\\LocalTestDB;Database=TestDB;Integrated Security=True;")
+        public DatabaseSetup(string connectionString = "Data Source = 192.168.6.131; Initial Catalog = _BS_TestDB; User ID = Azubi; Password = TestSQL2020#!;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=True;")
         {
             if (string.IsNullOrEmpty(connectionString))
             {

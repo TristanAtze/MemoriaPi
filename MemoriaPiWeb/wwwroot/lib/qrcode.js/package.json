@@ -1,0 +1,19 @@
+{
+  "name": "qrcode.js",
+  "version": "0.0.1",
+  "description": "QR Code Detection / Decoding / Generation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "pngjs": "0.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/FrozenRidge/jsqrcode.git"
+  },
+  "author": "Peter Braden <hi@peterbraden.co.uk>",
+  "license": "Apache",
+  "readmeFilename": "readme.md"
+}
