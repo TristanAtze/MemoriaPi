@@ -4,13 +4,23 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-	</PropertyGroup>
+	  <UserSecretsId>80abab11-25ee-4602-84ca-44a09fb3e2b4</UserSecretsId>
+  </PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Areas\Identity\Pages\Account\Manage\ExternalLogins.cshtml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="Areas\Identity\Pages\Account\Manage\ExternalLogins.cshtml" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\MemoriaPiDataCore\MemoriaPiDataCore.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.6" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.6" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.6" />
@@ -25,6 +35,11 @@
 
 	<ItemGroup>
 	  <Folder Include="Areas\Identity\Data\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Areas\Identity\Pages\Account\Manage\ExternalLogins.cshtml" />
+	  <None Include="Areas\Identity\Pages\Account\Manage\ExternalLogins.cshtml.cs" />
 	</ItemGroup>
 
 </Project>
