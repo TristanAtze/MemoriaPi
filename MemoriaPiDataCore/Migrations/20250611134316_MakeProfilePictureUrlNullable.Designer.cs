@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MemoriaPiDataCore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250611080048_InitialIdentitySchema")]
-    partial class InitialIdentitySchema
+    [Migration("20250611134316_MakeProfilePictureUrlNullable")]
+    partial class MakeProfilePictureUrlNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,6 +69,9 @@ namespace MemoriaPiDataCore.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
