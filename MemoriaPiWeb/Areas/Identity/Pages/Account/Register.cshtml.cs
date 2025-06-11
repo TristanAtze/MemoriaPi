@@ -50,6 +50,11 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            // HINZUGEFÜGT: Feld für den Benutzernamen
+            [Required]
+            [Display(Name = "Username")]
+            public string UserName { get; set; }
+
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -80,9 +85,12 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
+                // GEÄNDERT: CreateUser() wird durch die direktere Instanziierung ersetzt
+                // und Input.UserName wird für den Benutzernamen verwendet.
+                var user = new ApplicationUser { UserName = Input.UserName, Email = Input.Email, HasAccess = false };
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                // GEÄNDERT: SetUserNameAsync verwendet jetzt den Wert aus dem Formular
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
 
                 var emailStore = GetEmailStore();
                 await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -111,12 +119,9 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        // Hier wird noch die Logik für den Zugriffsschutz eingefügt.
-                        // Standardmäßig ist HasAccess auf false, also leiten wir zu AccessDenied um.
                         await _signInManager.SignInAsync(user, isPersistent: false);
 
-                        // Wenn der Benutzer keinen Zugriff hat, auf die "Zugriff verweigert"-Seite umleiten.
-                        if (!user.HasAccess) // Vorausgesetzt, Ihre ApplicationUser-Klasse hat ein HasAccess-Feld
+                        if (!user.HasAccess)
                         {
                             return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
                         }
@@ -131,21 +136,6 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             }
 
             return Page();
-        }
-
-        // Diese Methode ist robuster zur Erstellung eines Benutzers
-        private ApplicationUser CreateUser()
-        {
-            try
-            {
-                return Activator.CreateInstance<ApplicationUser>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
         }
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()

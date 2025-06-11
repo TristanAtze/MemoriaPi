@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MemoriaPiDataCore.Models; // Sicherstellen, dass der Namespace korrekt ist
+using MemoriaPiDataCore.Models;
 
 namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        // Alle Dienste werden jetzt korrekt für ApplicationUser angefordert
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
@@ -23,6 +22,8 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
             _signInManager = signInManager;
         }
 
+        // Diese Eigenschaft wird nicht mehr direkt gebunden,
+        // sondern ist Teil des InputModels
         public string Username { get; set; }
 
         [TempData]
@@ -33,6 +34,10 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            // NEU: Benutzernamen zum InputModel hinzufügen
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
@@ -43,10 +48,13 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
+            // Setzen des Anzeige-Namens
             Username = userName;
 
+            // Füllen des InputModels für das Formular
             Input = new InputModel
             {
+                Username = userName,
                 PhoneNumber = phoneNumber
             };
         }
@@ -75,6 +83,18 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account.Manage
             {
                 await LoadAsync(user);
                 return Page();
+            }
+
+            // NEU: Logik zum Ändern des Benutzernamens
+            var userName = await _userManager.GetUserNameAsync(user);
+            if (Input.Username != userName)
+            {
+                var setUserNameResult = await _userManager.SetUserNameAsync(user, Input.Username);
+                if (!setUserNameResult.Succeeded)
+                {
+                    StatusMessage = "Error: That username is already taken.";
+                    return RedirectToPage();
+                }
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

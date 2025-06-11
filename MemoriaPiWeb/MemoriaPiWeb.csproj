@@ -8,14 +8,6 @@
   </PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Areas\Identity\Pages\Account\Manage\ExternalLogins.cshtml.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Remove="Areas\Identity\Pages\Account\Manage\ExternalLogins.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\MemoriaPiDataCore\MemoriaPiDataCore.csproj" />
 	</ItemGroup>
 

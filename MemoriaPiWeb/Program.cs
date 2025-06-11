@@ -9,10 +9,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Konfiguration lesen ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Eigene Dienste mit der Konfiguration initialisieren ---
 if (!string.IsNullOrEmpty(connectionString))
 {
     DatabaseSetup databaseSetup = new DatabaseSetup(connectionString);
