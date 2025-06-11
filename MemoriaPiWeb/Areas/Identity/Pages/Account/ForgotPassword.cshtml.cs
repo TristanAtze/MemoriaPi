@@ -1,16 +1,17 @@
 #nullable disable
 
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+using MemoriaPiDataCore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using MemoriaPiDataCore.Models;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 {
@@ -47,13 +48,19 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(Input.Email);
+                // *** KORREKTUR HIER: Wir verwenden FirstOrDefaultAsync, um den Fehler abzufangen ***
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == Input.Email);
+
+                // Wir prüfen nur noch, ob der Benutzer existiert.
+                // Der Email-Bestätigungs-Check ist für die Entwicklung entfernt.
                 if (user == null)
                 {
+                    // Zeige die Erfolgsmeldung trotzdem an, um nicht preiszugeben, ob ein Benutzer existiert.
                     FormSubmittedSuccessfully = true;
                     return Page();
                 }
 
+                // Dieser Code wird jetzt für jeden existierenden Benutzer erreicht.
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
