@@ -30,6 +30,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Areas\Identity\Data\" />
+	  <Folder Include="wwwroot\uploads\" />
 	</ItemGroup>
 
 	<ItemGroup>

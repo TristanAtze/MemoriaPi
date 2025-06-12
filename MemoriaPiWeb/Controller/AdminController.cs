@@ -64,13 +64,14 @@ namespace MemoriaPiWeb.Controller
                 MustChangePassword = user.MustChangePassword,
                 IsLockedOut = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow,
                 AllRoles = allRoles.Select(r => new SelectListItem(r.Name, r.Name)).ToList(),
-                SelectedRoles = userRoles.ToList()
+                SelectedRoles = userRoles.ToList(),
+
+                StorageCapacityGB = user.StorageCapacityGB
             };
 
             return View(model);
         }
 
-        // KORREKTUR HIER: Wir geben eine explizite Route für die POST-Aktion an.
         [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AdminUserViewModel model)
@@ -88,6 +89,9 @@ namespace MemoriaPiWeb.Controller
             user.UserName = model.UserName;
             user.Email = model.Email;
             user.MustChangePassword = model.MustChangePassword;
+
+            // HIER WIRD DER NEUE SPEICHERWERT AUS DEM FORMULAR GESPEICHERT
+            user.StorageCapacityGB = model.StorageCapacityGB;
 
             if (model.NewProfilePicture != null)
             {

@@ -39,6 +39,11 @@
                         <label class="form-check-label" asp-for="IsLockedOut">Account sperren</label>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="StorageCapacityGB" class="form-label"></label>
+                    <input asp-for="StorageCapacityGB" class="form-control" type="number" />
+                    <span asp-validation-for="StorageCapacityGB" class="text-danger"></span>
+                </div>
                 <div class="col-md-4 text-center">
                     <label class="form-label">Profilbild</label>
                     <img src="@(Model.ProfilePictureUrl ?? "/images/profile-pictures/default.png")" class="img-fluid rounded-circle mb-2" alt="Profilbild" style="width:150px; height:150px; object-fit: cover;">

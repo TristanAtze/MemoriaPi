@@ -1,17 +1,27 @@
 ﻿@page
 @model MemoriaPiWeb.Pages.CloudModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @{
     ViewData["Title"] = "Cloud Speicher";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
+<input type="file" id="file-upload-input" multiple style="display: none;" />
+<input type="hidden" id="RequestVerificationToken" name="RequestVerificationToken" value="@Xsrf.GetAndStoreTokens(HttpContext).RequestToken" />
+
 <div class="content-full-width">
     <div class="cloud-wrapper">
         <aside class="cloud-sidebar">
-            <button class="btn btn-new shadow-sm d-flex align-items-center justify-content-center">
-                <i class="fas fa-plus"></i>
-                <span class="ms-2">Neu</span>
-            </button>
+            <div class="dropdown">
+                <button class="btn btn-new shadow-sm d-flex align-items-center justify-content-center w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-plus"></i>
+                    <span class="ms-2">Neu</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href="#" id="upload-file-button"><i class="fas fa-file-upload me-2"></i>Datei hochladen</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-folder-plus me-2"></i>Neuer Ordner</a></li>
+                </ul>
+            </div>
 
             <ul class="cloud-sidebar-nav">
                 <li><a href="#" class="active"><i class="fas fa-hdd"></i> Meine Ablage</a></li>
@@ -23,19 +33,18 @@
             <div class="storage-status">
                 <p class="mb-2"><i class="fas fa-cloud me-2"></i>Speicher</p>
                 <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar" role="progressbar" style="width: @Model.UsedPercentage%;" aria-valuenow="@Model.UsedPercentage" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <small class="mt-2 d-block">1.25 GB von 5 GB belegt</small>
+                <small class="mt-2 d-block">@Model.UsedStorageGB GB von @Model.TotalStorageGB GB belegt</small>
             </div>
         </aside>
 
         <main class="cloud-main">
             <div class="cloud-main-header">
                 <h2>Meine Ablage</h2>
-
                 <div class="view-options">
                     <label for="icon-size-selector" class="me-2">Anzeige:</label>
-                    <select id="icon-size-selector" class="form-select form-select-sm" style="width: auto;">
+                    <select id="icon-size-selector" class="form-select form-select-sm form-select-themed" style="width: auto;">
                         <option value="small">Klein</option>
                         <option value="medium" selected>Mittel</option>
                         <option value="large">Groß</option>
@@ -43,34 +52,38 @@
                 </div>
             </div>
 
-            <h5>Ordner</h5>
-            <hr style="border-color: rgba(255,255,255,0.2);" />
-            <div class="file-grid mb-5">
-                <a href="#" class="file-item">
-                    <div class="file-icon"><i class="fas fa-folder text-primary"></i></div>
-                    <div class="file-name">Projekte</div>
-                </a>
-                <a href="#" class="file-item">
-                    <div class="file-icon"><i class="fas fa-folder text-primary"></i></div>
-                    <div class="file-name">Dokumente</div>
-                </a>
+            <div id="file-grid-container" class="file-grid">
+                @if (Model.UserFiles.Any())
+                {
+                    @foreach (var file in Model.UserFiles)
+                    {
+                        <div class="file-item-wrapper">
+                            <div class="file-item-menu dropdown">
+                                <button class="btn btn-sm btn-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item rename-btn" href="#" data-filename="@file.FileName">Umbenennen</a></li>
+                                    <li><a class="dropdown-item delete-btn" href="#" data-filename="@file.FileName">Löschen</a></li>
+                                </ul>
+                            </div>
+                            <a href="@file.FilePath" target="_blank" class="file-item">
+                                <div class="file-icon"><i class="fas fa-file-alt"></i></div>
+                                <div class="file-name">@file.FileName</div>
+                                <div class="file-size">@file.FileSize</div>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-white-50">Keine Dateien gefunden. Laden Sie Ihre erste Datei hoch!</p>
+                }
             </div>
 
-            <h5>Dateien</h5>
-            <hr style="border-color: rgba(255,255,255,0.2);" />
-            <div class="file-grid">
-                <a href="#" class="file-item">
-                    <div class="file-icon"><i class="fas fa-file-pdf text-danger"></i></div>
-                    <div class="file-name">Jahresbericht.pdf</div>
-                </a>
-                <a href="#" class="file-item">
-                    <div class="file-icon"><i class="fas fa-file-image text-success"></i></div>
-                    <div class="file-name">Urlaubsbild_2025.jpg</div>
-                </a>
-                <a href="#" class="file-item">
-                    <div class="file-icon"><i class="fas fa-file-word text-info"></i></div>
-                    <div class="file-name">Anschreiben.docx</div>
-                </a>
+            <div id="drop-zone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Dateien hierher ziehen, um sie hochzuladen</p>
             </div>
         </main>
     </div>
@@ -78,30 +91,107 @@
 
 @section Scripts {
     <script>
-        // Dieser Teil sorgt dafür, dass die Icon-Größe geändert werden kann
+        // EINMALIGER 'DOMContentLoaded' für das gesamte Skript
         document.addEventListener('DOMContentLoaded', function () {
-            const selector = document.getElementById('icon-size-selector');
-            const fileGrids = document.querySelectorAll('.file-grid');
 
-            function updateIconSize(size) {
-                fileGrids.forEach(grid => {
-                    grid.classList.remove('size-small', 'size-medium', 'size-large');
-                    grid.classList.add(`size-${size}`);
-                });
+            const requestToken = document.getElementById('RequestVerificationToken').value;
+
+            // -------- HILFSFUNKTIONEN --------
+            async function uploadFiles(files) {
+                if (files.length === 0) return;
+                const formData = new FormData();
+                for (const file of files) {
+                    formData.append('files', file);
+                }
+                try {
+                    const response = await fetch('/api/Files/Upload', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'RequestVerificationToken': requestToken } // Token für Upload
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(`Fehler: ${result.message}`);
+                    }
+                } catch (error) {
+                    alert('Ein unerwarteter Upload-Fehler ist aufgetreten.');
+                }
             }
 
-            selector.addEventListener('change', function () {
-                updateIconSize(this.value);
+            async function sendFileAction(url, body) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': requestToken
+                        },
+                        body: JSON.stringify(body)
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(`Fehler: ${result.message || 'Serverfehler'}`);
+                    }
+                } catch (error) {
+                    alert('Ein unerwarteter Fehler bei der Aktion ist aufgetreten.');
+                }
+            }
+
+            // -------- EVENT LISTENERS --------
+            // 1. Upload-Logik
+            const uploadButton = document.getElementById('upload-file-button');
+            const fileInput = document.getElementById('file-upload-input');
+            const dropZone = document.getElementById('drop-zone');
+
+            if (uploadButton) uploadButton.addEventListener('click', (e) => { e.preventDefault(); fileInput.click(); });
+            if (fileInput) fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); });
+
+            if(dropZone) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); }));
+                ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('highlight')));
+                ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('highlight')));
+                dropZone.addEventListener('drop', (e) => { uploadFiles(e.dataTransfer.files); });
+            }
+
+            // 2. Datei-Aktionen (Löschen/Umbenennen)
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    const fileName = this.dataset.filename;
+                    if (confirm(`Möchten Sie die Datei "${fileName}" wirklich löschen?`)) {
+                        sendFileAction('/api/Files/Delete', { fileName: fileName });
+                    }
+                });
             });
 
-            updateIconSize(selector.value);
-        });
+            document.querySelectorAll('.rename-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    const oldFileName = this.dataset.filename;
+                    const newFileName = prompt(`Geben Sie einen neuen Namen für "${oldFileName}" ein:`, oldFileName);
+                    if (newFileName && newFileName !== oldFileName) {
+                        sendFileAction('/api/Files/Rename', { fileName: oldFileName, newFileName: newFileName });
+                    }
+                });
+            });
 
-        // NEUER TEIL: Fügt dem Body eine Klasse hinzu und entfernt sie beim Verlassen der Seite
-        document.body.classList.add('cloud-page-active');
-
-        window.addEventListener('beforeunload', function() {
-            document.body.classList.remove('cloud-page-active');
+            // 3. Icon-Größen-Dropdown
+            const selector = document.getElementById('icon-size-selector');
+            if (selector) {
+                const fileGrid = document.getElementById('file-grid-container');
+                function updateIconSize(size) {
+                    fileGrid.classList.remove('size-small', 'size-medium', 'size-large');
+                    fileGrid.classList.add(`size-${size}`);
+                }
+                selector.addEventListener('change', function () { updateIconSize(this.value); });
+                updateIconSize(selector.value);
+            }
         });
     </script>
 }
