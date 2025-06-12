@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MemoriaPiDataCore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250612085537_AddMustChangePasswordProperty")]
-    partial class AddMustChangePasswordProperty
+    [Migration("20250612155514_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,15 +79,15 @@ namespace MemoriaPiDataCore.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("StorageCapacityGB")
+                        .HasColumnType("int");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<DateTime?>("letzte_aktivitaet")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

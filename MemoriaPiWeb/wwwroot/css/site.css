@@ -626,3 +626,7 @@ select.form-select-themed {
     color: rgba(255,255,255,0.5);
     margin-top: 0.5rem;
 }
+
+.custom-file-button {
+    width: 100%; 
+}

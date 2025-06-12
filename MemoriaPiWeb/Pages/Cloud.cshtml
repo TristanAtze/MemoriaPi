@@ -106,31 +106,47 @@
 
             const requestToken = document.getElementById('RequestVerificationToken').value;
 
-            // -------- HILFSFUNKTIONEN --------
-            async function uploadFiles(files) {
-                if (files.length === 0) return;
-                const formData = new FormData();
-                for (const file of files) {
-                    formData.append('files', file);
-                }
-                try {
-                    // WICHTIG: Für den Upload wird kein AntiForgeryToken im Header benötigt,
-                    // da Browser dies bei FormData-Anfragen anders handhaben. Das [Authorize]-Attribut reicht hier.
-                    const response = await fetch('/api/Files/Upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        alert(result.message);
-                        location.reload();
-                    } else {
-                        alert(`Fehler: ${result.message || 'Der Upload ist fehlgeschlagen.'}`);
-                    }
-                } catch (error) {
-                    alert('Ein unerwarteter Upload-Fehler ist aufgetreten.');
-                }
+                    async function uploadFiles(files) {
+            if (files.length === 0) return;
+
+            // NEU: Größenprüfung im Frontend
+            const maxAllowedSize = 10 * 1024 * 1024 * 1024; // 2 GB in Bytes
+            let totalSize = 0;
+            for (const file of files) {
+                totalSize += file.size;
             }
+
+            if (totalSize > maxAllowedSize) {
+                alert(`Fehler: Die Gesamtgröße der Dateien (${(totalSize / (1024*1024*1024)).toFixed(2)} GB) überschreitet das Upload-Limit von 2 GB.`);
+                return; // Bricht den Upload ab
+            }
+            // Ende der neuen Prüfung
+
+            const formData = new FormData();
+            for (const file of files) {
+                formData.append('files', file);
+            }
+
+            const token = document.getElementById('RequestVerificationToken').value;
+
+            try {
+                const response = await fetch('/api/Files/Upload', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'RequestVerificationToken': token }
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert(`Fehler: ${result.message || 'Der Upload ist fehlgeschlagen.'}`);
+                }
+            } catch (error) {
+                console.error('Upload-Fehler:', error);
+                alert('Ein unerwarteter Upload-Fehler ist aufgetreten.');
+            }
+        }
 
             async function sendFileAction(url, body) {
                 try {

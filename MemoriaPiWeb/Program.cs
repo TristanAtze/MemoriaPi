@@ -76,6 +76,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ActiveUserStore>();
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 10_737_418_240L;
+});
 
 var app = builder.Build();
 

@@ -33,7 +33,9 @@
             </div>
 
             <div class="form-group mb-3">
-                <input asp-for="Input.ProfilePicture" class="form-control" />
+                <input asp-for="Input.ProfilePicture" class="form-control" id="profilePictureInput" style="display: none;" />
+
+                <label for="profilePictureInput" class="btn btn-primary custom-file-button" id="profilePictureLabel">Profilbild auswählen...</label>
             </div>
 
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
@@ -43,4 +45,27 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Wir warten, bis das gesamte Dokument geladen ist.
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Wir holen uns die Referenzen zu unserem Input-Feld und dem Label.
+            const fileInput = document.getElementById('profilePictureInput');
+            const fileLabel = document.getElementById('profilePictureLabel');
+
+            // Wir lauschen auf eine Änderung im Input-Feld (d.h. eine Datei wurde ausgewählt).
+            fileInput.addEventListener('change', function(event) {
+                // Prüfen, ob eine Datei ausgewählt wurde.
+                if (event.target.files.length > 0) {
+                    // Wenn ja, holen wir uns den Namen der ersten Datei.
+                    const fileName = event.target.files[0].name;
+                    // Wir setzen den Text des Labels auf den Dateinamen.
+                    fileLabel.textContent = fileName;
+                } else {
+                    // Falls der Benutzer den Dialog abbricht, setzen wir den Text zurück.
+                    fileLabel.textContent = 'Profilbild auswählen...';
+                }
+            });
+        });
+    </script>
 }
