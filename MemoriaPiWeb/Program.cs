@@ -6,7 +6,7 @@ using MemoriaPiWeb.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using MemoriaPiWeb.Middleware;
+using MemoriaPiWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +73,9 @@ if (!string.IsNullOrEmpty(githubClientId) && !string.IsNullOrEmpty(githubClientS
 
 
 builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<ActiveUserStore>();
+
 
 var app = builder.Build();
 
@@ -93,6 +96,10 @@ app.UseMiddleware<CheckPasswordResetMiddleware>();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 using (var scope = app.Services.CreateScope())
 {

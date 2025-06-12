@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MemoriaPiWeb.Controller
 {
     [Authorize(Roles = "Admin")]
+    [Route("Admin")]
     public class AdminController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -22,7 +23,7 @@ namespace MemoriaPiWeb.Controller
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // GET: /Admin
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -43,7 +44,7 @@ namespace MemoriaPiWeb.Controller
             return View(userViewModels);
         }
 
-        // GET: /Admin/Edit/userId
+        [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null) return NotFound();
@@ -69,12 +70,17 @@ namespace MemoriaPiWeb.Controller
             return View(model);
         }
 
-        // POST: /Admin/Edit/userId
-        [HttpPost]
+        // KORREKTUR HIER: Wir geben eine explizite Route für die POST-Aktion an.
+        [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AdminUserViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+            {
+                var allRoles = await _roleManager.Roles.ToListAsync();
+                model.AllRoles = allRoles.Select(r => new SelectListItem(r.Name, r.Name)).ToList();
+                return View(model);
+            }
 
             var user = await _userManager.FindByIdAsync(model.Id);
             if (user == null) return NotFound();
@@ -83,7 +89,6 @@ namespace MemoriaPiWeb.Controller
             user.Email = model.Email;
             user.MustChangePassword = model.MustChangePassword;
 
-            // Profilbild-Upload verarbeiten
             if (model.NewProfilePicture != null)
             {
                 string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images/profile-pictures");
@@ -102,16 +107,13 @@ namespace MemoriaPiWeb.Controller
                 user.ProfilePictureUrl = "/images/profile-pictures/" + uniqueFileName;
             }
 
-            // Rollen aktualisieren
             var currentRoles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            if (!result.Succeeded) return View(model); // Fehlerbehandlung
+            if (!result.Succeeded) return View(model);
 
             result = await _userManager.AddToRolesAsync(user, model.SelectedRoles);
-            if (!result.Succeeded) return View(model); // Fehlerbehandlung
+            if (!result.Succeeded) return View(model);
 
-
-            // Account sperren/entsperren
             if (model.IsLockedOut)
             {
                 await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
@@ -126,16 +128,13 @@ namespace MemoriaPiWeb.Controller
             return RedirectToAction(nameof(Index));
         }
 
-
-        // POST: /Admin/Delete/userId
-        [HttpPost]
+        [HttpPost("Delete/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
-                // Verhindere, dass der letzte Admin sich selbst löscht
                 var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
                 if (isAdmin && (await _userManager.GetUsersInRoleAsync("Admin")).Count == 1)
                 {

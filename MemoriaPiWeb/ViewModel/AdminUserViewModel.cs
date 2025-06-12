@@ -27,10 +27,8 @@ namespace MemoriaPiWeb.ViewModels
 
         public IList<string> CurrentRoles { get; set; } = new List<string>();
 
-        // Für die Dropdown-Liste der Rollen
         public List<SelectListItem> AllRoles { get; set; } = new List<SelectListItem>();
 
-        // Zum Empfangen der ausgewählten Rollen aus dem Formular
         public List<string> SelectedRoles { get; set; } = new List<string>();
     }
 }

@@ -1,18 +1,14 @@
-#nullable disable
-
+// Haupt-Namespace am Anfang der Datei kann abweichen
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using MemoriaPiDataCore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using MemoriaPiDataCore.Models; 
 
 namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 {
-    [AllowAnonymous]
     public class ResetPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -40,22 +36,23 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
-
+            
             [Required]
             public string Code { get; set; }
         }
 
-        public IActionResult OnGet(string code = null)
+        public IActionResult OnGet(string code = null, string email = null)
         {
-            if (code == null)
+            if (code == null || email == null)
             {
-                return BadRequest("A code must be supplied for password reset.");
+                return BadRequest("A code and email must be supplied for password reset.");
             }
             else
             {
                 Input = new InputModel
                 {
-                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code))
+                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)),
+                    Email = email
                 };
                 return Page();
             }
@@ -77,6 +74,14 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
             if (result.Succeeded)
             {
+                // KORREKTUR HIER: Wir setzen den "MustChangePassword"-Flag zurück.
+                if (user.MustChangePassword)
+                {
+                    user.MustChangePassword = false;
+                    await _userManager.UpdateAsync(user);
+// An dieser Stelle sollte die Bestätigungsseite für die Passwortzurücksetzung angezeigt werden.
+                }
+
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
 

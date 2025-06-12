@@ -1,0 +1,149 @@
+﻿@* @{
+    ViewData["Title"] = "Admin Dashboard";
+    // Wir verwenden das gleiche Layout wie der Rest der Anwendung
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Hier kannst du alle Benutzer verwalten.</p>
+
+<table class="table table-striped table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Benutzername</th>
+            <th>E-Mail</th>
+            <th>Rollen</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody id="userTableBody">
+        <tr><td colspan="4" class="text-center">Lade Benutzer...</td></tr>
+    </tbody>
+</table>
+
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Benutzer bearbeiten</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId" />
+                    <div class="mb-3">
+                        <label for="editUserName" class="form-label">Benutzername</label>
+                        <input type="text" class="form-control" id="editUserName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">E-Mail</label>
+                        <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRoles" class="form-label">Rollen (durch Komma getrennt)</label>
+                        <input type="text" class="form-control" id="editRoles" required>
+                        <small class="form-text text-muted">Z.B.: Admin, User</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                <button type="button" class="btn btn-primary" id="saveUserChanges">Änderungen speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Funktion zum Laden der Benutzerdaten von der API
+            function loadUsers() {
+                $.ajax({
+                    url: "/api/Admin/users",
+                    method: "GET",
+                    success: function (data) {
+                        var tableBody = $("#userTableBody");
+                        tableBody.empty(); // Leert die Tabelle vor dem Neuladen
+                        if(data.length === 0) {
+                            tableBody.append('<tr><td colspan="4" class="text-center">Keine Benutzer gefunden.</td></tr>');
+                            return;
+                        }
+                        data.forEach(function (user) {
+                            var roles = user.roles.join(', ');
+                            var row = `<tr>
+                                <td>${user.userName}</td>
+                                <td>${user.email}</td>
+                                <td>${roles}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm edit-btn" data-id="${user.id}">Bearbeiten</button>
+                                    <button class="btn btn-danger btn-sm delete-btn" data-id="${user.id}">Löschen</button>
+                                </td>
+                            </tr>`;
+                            tableBody.append(row);
+                        });
+                    },
+                    error: function (err) {
+                        console.error("Fehler beim Laden der Benutzer:", err);
+                        $("#userTableBody").html('<tr><td colspan="4" class="text-center text-danger">Fehler beim Laden der Benutzer.</td></tr>');
+                    }
+                });
+            }
+
+            // Event-Handler für den Löschen-Button
+            $('#userTableBody').on('click', '.delete-btn', function () {
+                var userId = $(this).data('id');
+                if (confirm('Bist du sicher, dass du diesen Benutzer löschen möchtest?')) {
+                    $.ajax({
+                        url: `/api/Admin/users/${userId}`,
+                        method: 'DELETE',
+                        success: function () {
+                            loadUsers(); // Daten neu laden
+                        },
+                        error: function (err) {
+                            alert('Fehler beim Löschen des Benutzers.');
+                        }
+                    });
+                }
+            });
+
+            // Event-Handler für den Bearbeiten-Button (öffnet das Modal)
+            $('#userTableBody').on('click', '.edit-btn', function () {
+                var userId = $(this).data('id');
+                $.get(`/api/Admin/users/${userId}`, function(user) {
+                    $('#editUserId').val(user.id);
+                    $('#editUserName').val(user.userName);
+                    $('#editEmail').val(user.email);
+                    $('#editRoles').val(user.roles.join(', '));
+                    $('#editUserModal').modal('show');
+                });
+            });
+
+            // Event-Handler für den Speichern-Button im Modal
+            $('#saveUserChanges').on('click', function () {
+                var userId = $('#editUserId').val();
+                var userData = {
+                    email: $('#editEmail').val(),
+                    roles: $('#editRoles').val().split(',').map(s => s.trim())
+                };
+
+                $.ajax({
+                    url: `/api/Admin/users/${userId}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(userData),
+                    success: function () {
+                        $('#editUserModal').modal('hide');
+                        loadUsers(); // Daten neu laden
+                    },
+                    error: function (err) {
+                       alert('Fehler beim Aktualisieren des Benutzers.');
+                    }
+                });
+            });
+
+            // Initiales Laden der Benutzer beim Seitenaufruf
+            loadUsers();
+        });
+    </script>
+} *@

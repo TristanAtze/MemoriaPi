@@ -312,3 +312,35 @@ footer.footer {
     .admin-user-table thead th {
         border-bottom-width: 2px;
     }
+
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+/* HIER IST DER FEHLENDE STIL FÜR DEN LILA BUTTON */
+.btn-lilac {
+    color: #fff !important;
+    background-color: #6a5acd !important;
+    border-color: #6a5acd !important;
+}
+
+    .btn-lilac:hover {
+        color: #fff !important;
+        background-color: #5d4db3 !important;
+        border-color: #5547a5 !important;
+    }

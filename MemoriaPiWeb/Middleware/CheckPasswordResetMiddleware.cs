@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using MemoriaPiDataCore.Models;
+﻿using MemoriaPiDataCore.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities; // Wichtig für WebEncoders
+using System.Text; // Wichtig für Encoding.UTF8
 
 namespace MemoriaPiWeb.Middleware
 {
@@ -12,24 +14,35 @@ namespace MemoriaPiWeb.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager)
         {
-            // Nur für angemeldete Benutzer prüfen
-            if (context.User.Identity.IsAuthenticated)
+            if (context.User.Identity != null && context.User.Identity.IsAuthenticated)
             {
                 var user = await userManager.GetUserAsync(context.User);
 
-                // Prüfen, ob der Benutzer das Flag hat UND sich nicht bereits auf der Seite zur Passwortänderung befindet
-                if (user != null && user.MustChangePassword && !context.Request.Path.Value.Contains("/Account/Manage/ChangePassword"))
+                if (user != null && user.MustChangePassword)
                 {
-                    // Den Benutzer abmelden und zur Login-Seite weiterleiten mit einer Nachricht
-                    await signInManager.SignOutAsync();
-                    context.Response.Redirect("/Identity/Account/Login?mustChangePassword=true");
-                    return; // Wichtig: Die weitere Ausführung stoppen
+                    var path = context.Request.Path.Value;
+                    var allowedPaths = new[] { "/Identity/Account/ResetPassword", "/Identity/Account/Logout" };
+
+                    if (path != null && !allowedPaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        // 1. Passwort-Reset-Token generieren.
+                        var code = await userManager.GeneratePasswordResetTokenAsync(user);
+
+                        // KORREKTUR HIER: Den Token in das von der Zielseite erwartete Base64Url-Format kodieren.
+                        var encodedCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                        // 3. Die URL mit dem korrekt kodierten Token erstellen.
+                        var redirectUrl = $"/Identity/Account/ResetPassword?code={encodedCode}&email={Uri.EscapeDataString(user.Email!)}";
+
+                        context.Response.Redirect(redirectUrl);
+                        return;
+                    }
                 }
             }
 
-            await _next(context); // Nächste Middleware in der Kette aufrufen
+            await _next(context);
         }
     }
 }
