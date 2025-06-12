@@ -297,3 +297,18 @@ footer.footer {
     .form-container-wrapper hr {
         border-color: rgba(255, 255, 255, 0.2);
     }
+
+/* Admin Benutzer-Tabelle */
+.admin-user-table {
+    color: #e9ecef;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+    .admin-user-table th, .admin-user-table td {
+        border-color: rgba(255, 255, 255, 0.2);
+        vertical-align: middle;
+    }
+
+    .admin-user-table thead th {
+        border-bottom-width: 2px;
+    }
