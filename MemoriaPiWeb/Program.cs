@@ -35,7 +35,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.S
 
 var authenticationBuilder = builder.Services.AddAuthentication();
 
-// --- Microsoft-Login hinzufügen, WENN konfiguriert ---
 var microsoftClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
 var microsoftClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
 if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
@@ -47,7 +46,6 @@ if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftC
     });
 }
 
-// --- Google-Login hinzufügen, WENN konfiguriert ---
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
@@ -59,7 +57,6 @@ if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientS
     });
 }
 
-// --- GitHub-Login hinzufügen, WENN konfiguriert ---
 var githubClientId = builder.Configuration["Authentication:GitHub:ClientId"];
 var githubClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
 if (!string.IsNullOrEmpty(githubClientId) && !string.IsNullOrEmpty(githubClientSecret))
@@ -82,8 +79,6 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 var app = builder.Build();
-
-// --- HTTP Request Pipeline konfigurieren ---
 
 if (!app.Environment.IsDevelopment())
 {
