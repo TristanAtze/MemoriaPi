@@ -1,88 +1,96 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using MemoriaPiDataCore.Models;
+﻿using MemoriaPiDataCore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
-[ApiController]
-[Route("api/[controller]")]
-public class FilesController : ControllerBase
+namespace MemoriaPiWeb.Controller
 {
-    private readonly IWebHostEnvironment _hostingEnvironment;
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public FilesController(IWebHostEnvironment hostingEnvironment, UserManager<ApplicationUser> userManager)
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class FilesController : ControllerBase
     {
-        _hostingEnvironment = hostingEnvironment;
-        _userManager = userManager;
-    }
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-    // Upload-Methode (unverändert)
-    [HttpPost("Upload")]
-    public async Task<IActionResult> Upload(List<IFormFile> files)
-    {
-        // ... Ihr bestehender Upload-Code ...
-        return Ok(new { message = $"{files.Count} Datei(en) erfolgreich hochgeladen." });
-    }
-
-    [HttpPost("Delete")]
-    [ValidateAntiForgeryToken] // Optional, aber gut für die Sicherheit
-    public async Task<IActionResult> Delete([FromBody] FileActionRequest request) // KORREKTUR HIER
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return Unauthorized();
-
-        var userFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", user.Id);
-
-        // Wir verwenden jetzt request.FileName statt id
-        var filePath = Path.Combine(userFolderPath, request.FileName);
-
-        if (System.IO.File.Exists(filePath))
+        public FilesController(IWebHostEnvironment hostingEnvironment, UserManager<ApplicationUser> userManager)
         {
-            System.IO.File.Delete(filePath);
-            return Ok(new { message = "Datei erfolgreich gelöscht." });
+            _hostingEnvironment = hostingEnvironment;
+            _userManager = userManager;
         }
-        return NotFound(new { message = "Datei nicht gefunden." });
-    }
 
-    // NEU: Methode zum Umbenennen einer Datei
-    [HttpPost("Rename")]
-    public async Task<IActionResult> Rename([FromBody] FileActionRequest request)
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return Unauthorized();
-
-        var userFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", user.Id);
-        var oldFilePath = Path.Combine(userFolderPath, request.FileName);
-        var newFilePath = Path.Combine(userFolderPath, request.NewFileName);
-
-        if (System.IO.File.Exists(oldFilePath))
+        [HttpPost("Upload")]
+        // Das [ValidateAntiForgeryToken] wird hier entfernt, da [Authorize] ausreicht.
+        public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            if (System.IO.File.Exists(newFilePath))
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var userFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", user.Id);
+            Directory.CreateDirectory(userFolderPath);
+
+            long currentSize = GetDirectorySize(userFolderPath);
+            long uploadSize = files.Sum(f => f.Length);
+            long allowedSize = (long)user.StorageCapacityGB * 1024 * 1024 * 1024;
+
+            if (currentSize + uploadSize > allowedSize)
             {
-                return BadRequest(new { message = "Eine Datei mit diesem Namen existiert bereits." });
+                return BadRequest(new { message = "Nicht genügend Speicherplatz." });
             }
-            System.IO.File.Move(oldFilePath, newFilePath);
-            return Ok(new { message = "Datei erfolgreich umbenannt." });
+
+            foreach (var formFile in files)
+            {
+                if (formFile.Length > 0)
+                {
+                    var filePath = Path.Combine(userFolderPath, formFile.FileName);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        // Optional: Umgang mit bereits existierenden Dateien
+                        return BadRequest(new { message = $"Die Datei '{formFile.FileName}' existiert bereits." });
+                    }
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                    }
+                }
+            }
+
+            return Ok(new { message = $"{files.Count} Datei(en) erfolgreich hochgeladen." });
         }
-        return NotFound(new { message = "Datei nicht gefunden." });
-    }
 
+        // NEU: Methode zum Erstellen eines Ordners
+        [HttpPost("CreateFolder")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateFolder([FromBody] FileActionRequest request)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
 
-    private long GetDirectorySize(string path)
-    {
-        // ... Ihre bestehende Methode ...
-        if (!Directory.Exists(path)) return 0;
-        return new DirectoryInfo(path).GetFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
-    }
+            var userFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", user.Id);
+            var newFolderPath = Path.Combine(userFolderPath, request.FolderName);
 
-    // NEU: Eine Klasse für die Anfragen
-    public class FileActionRequest
-    {
-        public string FileName { get; set; }
-        public string NewFileName { get; set; }
+            if (Directory.Exists(newFolderPath))
+            {
+                return BadRequest(new { message = "Ein Ordner mit diesem Namen existiert bereits." });
+            }
+
+            Directory.CreateDirectory(newFolderPath);
+            return Ok(new { message = "Ordner erfolgreich erstellt." });
+        }
+
+        // ... (Ihre bestehenden Delete- und Rename-Methoden für Dateien) ...
+
+        private long GetDirectorySize(string path)
+        {
+            // ...
+        }
+
+        public class FileActionRequest
+        {
+            public string FileName { get; set; }
+            public string NewFileName { get; set; }
+            public string FolderName { get; set; } // Hinzugefügt für Ordner-Aktionen
+        }
     }
 }

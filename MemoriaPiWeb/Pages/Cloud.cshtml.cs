@@ -4,10 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MemoriaPiWeb.Pages
 {
@@ -22,8 +19,8 @@ namespace MemoriaPiWeb.Pages
         public int TotalStorageGB { get; set; }
         public int UsedPercentage { get; set; }
 
-        // NEU: Eine Liste für die Dateien, die angezeigt werden sollen
-        public List<FileInfoViewModel> UserFiles { get; set; } = new List<FileInfoViewModel>();
+        // Die Liste enthält jetzt einen allgemeineren Typ, der Dateien und Ordner sein kann
+        public List<CloudItemViewModel> CloudItems { get; set; } = new List<CloudItemViewModel>();
 
         public CloudModel(UserManager<ApplicationUser> userManager, IWebHostEnvironment hostingEnvironment)
         {
@@ -39,26 +36,41 @@ namespace MemoriaPiWeb.Pages
             var userFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", user.Id);
             Directory.CreateDirectory(userFolderPath); // Sicherstellen, dass der Ordner existiert
 
-            // Speicherberechnung (wie bisher)
+            // Speicherberechnung
             long usedBytes = GetDirectorySize(userFolderPath);
             long totalBytes = (long)user.StorageCapacityGB * 1024 * 1024 * 1024;
             TotalStorageGB = user.StorageCapacityGB;
             UsedStorageGB = Math.Round((double)usedBytes / (1024 * 1024 * 1024), 2);
             UsedPercentage = totalBytes > 0 ? (int)((double)usedBytes / totalBytes * 100) : 100;
 
-            // NEU: Dateien aus dem Ordner auslesen und zur Liste hinzufügen
             var directoryInfo = new DirectoryInfo(userFolderPath);
-            var foundFiles = directoryInfo.GetFiles();
 
-            foreach (var fileInfo in foundFiles)
+            // Zuerst die Ordner auslesen
+            foreach (var dirInfo in directoryInfo.GetDirectories())
             {
-                UserFiles.Add(new FileInfoViewModel
+                CloudItems.Add(new CloudItemViewModel
                 {
-                    FileName = fileInfo.Name,
-                    FilePath = $"/uploads/{user.Id}/{fileInfo.Name}", // Pfad für den Download-Link
-                    FileSize = FormatFileSize(fileInfo.Length)
+                    Name = dirInfo.Name,
+                    IsFolder = true,
+                    IconClass = "fas fa-folder text-primary" // Festes Icon für Ordner
                 });
             }
+
+            // Danach die Dateien auslesen
+            foreach (var fileInfo in directoryInfo.GetFiles())
+            {
+                CloudItems.Add(new CloudItemViewModel
+                {
+                    Name = fileInfo.Name,
+                    IsFolder = false,
+                    FilePath = $"/uploads/{user.Id}/{fileInfo.Name}",
+                    FileSize = FormatFileSize(fileInfo.Length),
+                    IconClass = GetIconForFile(fileInfo.Name)
+                });
+            }
+
+            // Sortieren: Ordner zuerst, dann alphabetisch
+            CloudItems = CloudItems.OrderByDescending(item => item.IsFolder).ThenBy(item => item.Name).ToList();
         }
 
         private long GetDirectorySize(string path)
@@ -69,18 +81,36 @@ namespace MemoriaPiWeb.Pages
 
         private string FormatFileSize(long bytes)
         {
-            var unit = 1024;
+            const int unit = 1024;
             if (bytes < unit) return $"{bytes} B";
             var exp = (int)(Math.Log(bytes) / Math.Log(unit));
             return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
         }
+
+        private string GetIconForFile(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
+            {
+                ".pdf" => "fa-file-pdf text-danger",
+                ".jpg" or ".jpeg" or ".png" or ".gif" => "fa-file-image text-success",
+                ".zip" or ".rar" or ".7z" => "fa-file-archive text-warning",
+                ".docx" or ".doc" => "fa-file-word text-info",
+                ".xlsx" or ".xls" => "fa-file-excel text-success",
+                ".pptx" or ".ppt" => "fa-file-powerpoint text-danger",
+                ".txt" => "fa-file-alt text-secondary",
+                ".json" => "fa-file-code text-primary",
+                _ => "fa-file text-secondary",
+            };
+        }
     }
 
-    // NEU: Eine kleine Klasse, um Datei-Informationen an die Seite zu übergeben
-    public class FileInfoViewModel
+    public class CloudItemViewModel
     {
-        public string FileName { get; set; }
+        public string Name { get; set; }
+        public bool IsFolder { get; set; }
         public string FilePath { get; set; }
         public string FileSize { get; set; }
+        public string IconClass { get; set; }
     }
 }
