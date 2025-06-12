@@ -7,7 +7,7 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        // NEU: Wir holen uns das gesamte Benutzer-Objekt, um auf das Profilbild zugreifen zu können
+        // Dieser Teil für angemeldete Benutzer bleibt unverändert
         var user = await UserManager.GetUserAsync(User);
 
         <li class="nav-item">
@@ -36,11 +36,12 @@
     }
     else
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        // HIER WURDEN DIE ÄNDERUNGEN VORGENOMMEN
+        <li class="nav-item me-2">
+            <a class="btn btn-ios" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            <a class="btn btn-ios" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
     }
 </ul>

@@ -1,12 +1,7 @@
-#nullable disable
-
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
+using MemoriaPiDataCore.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,16 +9,16 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using MemoriaPiDataCore.Models;
 
 namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
+        private readonly IUserEmailStore<ApplicationUser> _emailStore; // Fehlendes Feld hinzugefügt
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
@@ -36,6 +31,7 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
         {
             _userManager = userManager;
             _userStore = userStore;
+            _emailStore = GetEmailStore(); // Korrekte Initialisierung
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
@@ -50,7 +46,6 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            // HINZUGEFÜGT: Feld für den Benutzernamen
             [Required]
             [Display(Name = "Username")]
             public string UserName { get; set; }
@@ -72,7 +67,6 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
@@ -85,51 +79,24 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                // GEÄNDERT: CreateUser() wird durch die direktere Instanziierung ersetzt
-                // und Input.UserName wird für den Benutzernamen verwendet.
-                var user = new ApplicationUser { UserName = Input.UserName, Email = Input.Email, HasAccess = false };
+                var user = CreateUser(); // Die fehlende Methode wird unten hinzugefügt
 
-                // GEÄNDERT: SetUserNameAsync verwendet jetzt den Wert aus dem Formular
-                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
-
-                var emailStore = GetEmailStore();
-                await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
+                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    await _userManager.AddToRoleAsync(user, "User");
+                    // Ihre gewünschte Logik: Benutzer sofort nach Erstellung sperren
+                    await _userManager.SetLockoutEnabledAsync(user, true);
+                    await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
 
                     var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-
-                        if (!user.HasAccess)
-                        {
-                            return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
-                        }
-
-                        return RedirectToPage("/Dashboard");
-                    }
+                    // Umleitung zur Bestätigungsseite
+                    return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                 }
                 foreach (var error in result.Errors)
                 {
@@ -137,7 +104,22 @@ namespace MemoriaPiWeb.Areas.Identity.Pages.Account
                 }
             }
 
+            // Wenn etwas fehlschlägt, das Formular erneut anzeigen
             return Page();
+        }
+
+        private ApplicationUser CreateUser()
+        {
+            try
+            {
+                return Activator.CreateInstance<ApplicationUser>();
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
+            }
         }
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()

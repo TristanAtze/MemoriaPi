@@ -1,0 +1,107 @@
+﻿@page
+@model MemoriaPiWeb.Pages.CloudModel
+@{
+    ViewData["Title"] = "Cloud Speicher";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="content-full-width">
+    <div class="cloud-wrapper">
+        <aside class="cloud-sidebar">
+            <button class="btn btn-new shadow-sm d-flex align-items-center justify-content-center">
+                <i class="fas fa-plus"></i>
+                <span class="ms-2">Neu</span>
+            </button>
+
+            <ul class="cloud-sidebar-nav">
+                <li><a href="#" class="active"><i class="fas fa-hdd"></i> Meine Ablage</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Für mich freigegeben</a></li>
+                <li><a href="#"><i class="fas fa-star"></i> Markiert</a></li>
+                <li><a href="#"><i class="fas fa-trash"></i> Papierkorb</a></li>
+            </ul>
+
+            <div class="storage-status">
+                <p class="mb-2"><i class="fas fa-cloud me-2"></i>Speicher</p>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="mt-2 d-block">1.25 GB von 5 GB belegt</small>
+            </div>
+        </aside>
+
+        <main class="cloud-main">
+            <div class="cloud-main-header">
+                <h2>Meine Ablage</h2>
+
+                <div class="view-options">
+                    <label for="icon-size-selector" class="me-2">Anzeige:</label>
+                    <select id="icon-size-selector" class="form-select form-select-sm" style="width: auto;">
+                        <option value="small">Klein</option>
+                        <option value="medium" selected>Mittel</option>
+                        <option value="large">Groß</option>
+                    </select>
+                </div>
+            </div>
+
+            <h5>Ordner</h5>
+            <hr style="border-color: rgba(255,255,255,0.2);" />
+            <div class="file-grid mb-5">
+                <a href="#" class="file-item">
+                    <div class="file-icon"><i class="fas fa-folder text-primary"></i></div>
+                    <div class="file-name">Projekte</div>
+                </a>
+                <a href="#" class="file-item">
+                    <div class="file-icon"><i class="fas fa-folder text-primary"></i></div>
+                    <div class="file-name">Dokumente</div>
+                </a>
+            </div>
+
+            <h5>Dateien</h5>
+            <hr style="border-color: rgba(255,255,255,0.2);" />
+            <div class="file-grid">
+                <a href="#" class="file-item">
+                    <div class="file-icon"><i class="fas fa-file-pdf text-danger"></i></div>
+                    <div class="file-name">Jahresbericht.pdf</div>
+                </a>
+                <a href="#" class="file-item">
+                    <div class="file-icon"><i class="fas fa-file-image text-success"></i></div>
+                    <div class="file-name">Urlaubsbild_2025.jpg</div>
+                </a>
+                <a href="#" class="file-item">
+                    <div class="file-icon"><i class="fas fa-file-word text-info"></i></div>
+                    <div class="file-name">Anschreiben.docx</div>
+                </a>
+            </div>
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Dieser Teil sorgt dafür, dass die Icon-Größe geändert werden kann
+        document.addEventListener('DOMContentLoaded', function () {
+            const selector = document.getElementById('icon-size-selector');
+            const fileGrids = document.querySelectorAll('.file-grid');
+
+            function updateIconSize(size) {
+                fileGrids.forEach(grid => {
+                    grid.classList.remove('size-small', 'size-medium', 'size-large');
+                    grid.classList.add(`size-${size}`);
+                });
+            }
+
+            selector.addEventListener('change', function () {
+                updateIconSize(this.value);
+            });
+
+            updateIconSize(selector.value);
+        });
+
+        // NEUER TEIL: Fügt dem Body eine Klasse hinzu und entfernt sie beim Verlassen der Seite
+        document.body.classList.add('cloud-page-active');
+
+        window.addEventListener('beforeunload', function() {
+            document.body.classList.remove('cloud-page-active');
+        });
+    </script>
+}

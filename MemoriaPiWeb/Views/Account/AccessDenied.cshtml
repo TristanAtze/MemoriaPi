@@ -1,1 +1,27 @@
-<h1 class="text-danger">Zugriff verweigert.</h1><h2 class="text-danger">Du hast keine Berechtigung, auf diese Ressource zuzugreifen.</h2>
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Willkommen";
+    // Wir setzen das Layout auf null, um eine komplett leere Seite ohne Header/Footer zu haben
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MemoriaPi</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div id="particle-container"></div>
+
+    <div class="welcome-splash-container">
+        <h2 class="welcome-text-top">Willkommen zu</h2>
+        <h1 class="welcome-text-main">MemoriaPi</h1>
+    </div>
+
+</body>
+</html>

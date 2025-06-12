@@ -1,28 +1,27 @@
-using MemoriaPiDataCore.Models; // Hinzufügen
-using MemoriaPiWeb.Services; // Hinzufügen
+using MemoriaPiDataCore.Models;
+using MemoriaPiWeb.Services;
+using Microsoft.AspNetCore.Authorization; // Diese Zeile hinzufügen
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace MemoriaPiWeb.Pages
 {
+    [Authorize] // DIESES ATTRIBUT SCHÜTZT DIE SEITE
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
-        private readonly ActiveUserStore _activeUserStore; // Hinzufügen
+        private readonly ActiveUserStore _activeUserStore;
 
-        // Property für die Ansicht
         public List<ApplicationUser> ActiveUsers { get; private set; }
 
-        // Konstruktor anpassen
         public IndexModel(ILogger<IndexModel> logger, ActiveUserStore activeUserStore)
         {
             _logger = logger;
-            _activeUserStore = activeUserStore; // Hinzufügen
+            _activeUserStore = activeUserStore;
         }
 
         public void OnGet()
         {
-            // Aktive Benutzer für die Anzeige auf der Seite abrufen
             ActiveUsers = _activeUserStore.GetActiveUsers();
         }
     }
