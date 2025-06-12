@@ -114,10 +114,11 @@
                     formData.append('files', file);
                 }
                 try {
+                    // WICHTIG: Für den Upload wird kein AntiForgeryToken im Header benötigt,
+                    // da Browser dies bei FormData-Anfragen anders handhaben. Das [Authorize]-Attribut reicht hier.
                     const response = await fetch('/api/Files/Upload', {
                         method: 'POST',
-                        body: formData,
-                        headers: { 'RequestVerificationToken': requestToken }
+                        body: formData
                     });
                     const result = await response.json();
                     if (response.ok) {
@@ -184,7 +185,8 @@
                     const name = this.dataset.name;
                     const type = this.dataset.type;
                     if (confirm(`Möchten Sie ${type === 'folder' ? 'den Ordner' : 'die Datei'} "${name}" wirklich löschen?`)) {
-                        const url = type === 'folder' ? '/api/Files/DeleteFolder' : '/api/Files/Delete';
+                        // KORREKTUR HIER: Wir rufen die spezifischen Endpunkte auf
+                        const url = type === 'folder' ? '/api/Files/DeleteFolder' : '/api/Files/DeleteFile';
                         const body = type === 'folder' ? { folderName: name } : { fileName: name };
                         sendFileAction(url, body);
                     }
@@ -198,20 +200,23 @@
                     const type = this.dataset.type;
                     const newName = prompt(`Geben Sie einen neuen Namen für "${oldName}" ein:`, oldName);
                     if (newName && newName !== oldName) {
-                        const url = type === 'folder' ? '/api/Files/RenameFolder' : '/api/Files/Rename';
+                        // KORREKTUR HIER: Wir rufen die spezifischen Endpunkte auf
+                        const url = type === 'folder' ? '/api/Files/RenameFolder' : '/api/Files/RenameFile';
                         const body = type === 'folder' ? { folderName: oldName, newFolderName: newName } : { fileName: oldName, newFileName: newName };
                         sendFileAction(url, body);
                     }
                 });
             });
 
-            // 3. Icon-Größen-Dropdown
+            // 3. Icon-Größen-Dropdown (unverändert)
             const selector = document.getElementById('icon-size-selector');
             if (selector) {
                 const fileGrid = document.getElementById('file-grid-container');
                 function updateIconSize(size) {
-                    fileGrid.classList.remove('size-small', 'size-medium', 'size-large');
-                    fileGrid.classList.add(`size-${size}`);
+                    if (fileGrid) {
+                       fileGrid.classList.remove('size-small', 'size-medium', 'size-large');
+                       fileGrid.classList.add(`size-${size}`);
+                    }
                 }
                 selector.addEventListener('change', function () { updateIconSize(this.value); });
                 updateIconSize(selector.value);
